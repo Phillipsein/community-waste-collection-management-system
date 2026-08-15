@@ -87,24 +87,70 @@ payment flow can be demonstrated live.
 
 ## 5. Deploying to Hostinger Shared Hosting
 
+The project's source of truth is the GitHub repo:
+**https://github.com/Phillipsein/community-waste-collection-management-system**
+(private — ask Phillip to add you as a collaborator if you need push access).
+
+Both deployment paths below need the same database setup first.
+
+### 5.1 Database setup (do this once, either way)
+
 1. In Hostinger hPanel, create a MySQL database and a database user. Note
    the generated database name, username, password, and host (usually
    `localhost`).
 2. Open phpMyAdmin from hPanel, select the new database, and import
    `sql/schema.sql` first, then `sql/seed.sql`, using the Import tab (or the
    SQL tab, pasting the file contents).
-3. Edit `config.php` and fill in the real `DB_HOST`, `DB_NAME`, `DB_USER`,
-   and `DB_PASS` from step 1.
-4. Upload every file and folder in this project to `public_html` (or a
-   subfolder such as `public_html/wastecollect` if you want the site at a
-   sub path) using the Hostinger File Manager or an FTP client. Keep the
-   folder structure exactly as it is; the app works out the correct link
-   paths automatically whether it's installed at the domain root or in a
-   subfolder.
-5. In hPanel, confirm the PHP version for the domain is set to 8.1 or later.
-6. Visit the site's URL and confirm `index.php` loads, then log in as the
+3. In hPanel, confirm the PHP version for the domain is set to 8.1 or later.
+
+### 5.2 Option A — Git auto-deploy (what we're using)
+
+Hostinger's hPanel has a **Git** section (under Advanced) that can pull this
+repo directly and redeploy automatically on every push to `main`.
+
+1. In hPanel, go to **Advanced > Git**, and add this repository:
+   `https://github.com/Phillipsein/community-waste-collection-management-system.git`,
+   branch `main`, deploying into `public_html` (or a subfolder such as
+   `public_html/wastecollect`).
+   - The repo is private, so hPanel will ask for a way to authenticate — either
+     add the SSH public key it shows you as a **Deploy Key** on the GitHub
+     repo (Settings > Deploy keys, read-only access is enough), or use a
+     GitHub personal access token in the repo URL if hPanel asks for
+     HTTPS credentials instead.
+2. Turn on **Auto Deployment** for that repo/branch, if it isn't on by
+   default. From then on, every `git push` to `main` triggers a redeploy —
+   this is what "pushing auto-deploys it" refers to.
+3. **`config.php` is intentionally not in the repo** (it's gitignored so real
+   DB credentials never get committed or pushed — see `.gitignore` and
+   `config.sample.php`). This means it will not exist on the server after the
+   very first deploy, and the site will error until you create it:
+   - Open hPanel's File Manager, go to the deployed folder, copy
+     `config.sample.php` to a new file named `config.php`, and fill in the
+     real `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASS` from section 5.1.
+   - Do this once. Because `config.php` is untracked (not part of the git
+     history), later `git push`/auto-deploys pull in the rest of your code
+     changes without touching or deleting it. If a future deploy ever does
+     wipe it (some Git deploy tools reset the whole folder), just repeat this
+     step — the values don't change.
+4. Push to `main` (`git push origin main`) to trigger a deploy, then visit
+   the site's URL and confirm `index.php` loads.
+
+### 5.3 Option B — Manual upload (fallback, no git needed)
+
+1. Edit `config.php` locally and fill in the real `DB_HOST`, `DB_NAME`,
+   `DB_USER`, and `DB_PASS` from section 5.1.
+2. Upload every file and folder in this project to `public_html` (or a
+   subfolder such as `public_html/wastecollect`) using the Hostinger File
+   Manager or an FTP client, including `config.php` this time (it's only
+   excluded from git, not from a manual upload). Keep the folder structure
+   exactly as it is; the app works out the correct link paths automatically
+   whether it's installed at the domain root or in a subfolder.
+
+### 5.4 Either way, before the live presentation
+
+1. Visit the site's URL and confirm `index.php` loads, then log in as the
    seeded admin account to confirm the database connection works.
-7. Log in once as each seeded demo account (resident, collector,
+2. Log in once as each seeded demo account (resident, collector,
    administrator) to confirm every role's dashboard loads without errors
    before the live presentation.
 

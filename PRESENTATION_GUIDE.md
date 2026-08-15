@@ -49,15 +49,72 @@ staff, and can see the whole operation's numbers on one dashboard.
 ## 2. System Architecture
 
 The build brief was explicit: plain PHP, no framework, no Composer, no build step —
-ordinary Hostinger shared hosting with no SSH access. That constraint shaped the
-architecture directly: **one PHP file per page**, each file both the URL endpoint
-and the logic for that page, with no router in between. Open `admin/zones.php` and
-you're looking at everything that page does, top to bottom.
+ordinary Hostinger shared hosting with no SSH access. Logically, the system still
+follows the layered design from the report's architecture diagram (slide 8): a
+Presentation Layer, an Application Layer split into five modules, a Data Layer, and
+two External Systems this prototype simulates rather than calls out to.
 
-Every page under `resident/`, `collector/`, and `admin/` starts with the same call,
-before any HTML is written: `require_role('resident')`. That's the entire
-access-control layer — no middleware stack, just a function that checks the PHP
-session and redirects to `login.php` if the role doesn't match.
+```mermaid
+flowchart TB
+    subgraph PL["Presentation Layer"]
+        UI["Browser · Bootstrap 5 UI<br/>role-based navbar & views"]
+    end
+
+    subgraph AL["Application Layer"]
+        M1["User Management"]
+        M2["Pickup Request &<br/>Scheduling"]
+        M3["Payment Processing"]
+        M4["Complaint Management"]
+        M5["Reporting"]
+    end
+
+    subgraph DL["Data Layer"]
+        DB["MySQL / MariaDB<br/>(PDO, prepared statements)"]
+    end
+
+    subgraph EXT["External Systems"]
+        MM["Mobile Money<br/>Payment Gateway"]
+        SMS["SMS Notification<br/>Gateway"]
+    end
+
+    PL --> AL
+    AL --> DL
+    M3 -. simulated in-app · no outbound call .-> MM
+    M2 -. in-app status change, not a real SMS .-> SMS
+```
+
+*Matches the report's slide 8: same four layers, same five modules, same two
+external systems. The dashed lines mark where this prototype substitutes a
+simulation for the real external call — see below.*
+
+**Module map (slide 8 → this build):**
+
+| Module | Implementation |
+|---|---|
+| User Management | `register.php`, `login.php`, `admin/collectors.php` |
+| Pickup Request & Scheduling | `resident/request_pickup.php`, `resident/my_requests.php`, `admin/requests.php`, `admin/schedules.php` |
+| Payment Processing | `resident/pay.php`, the `payments` table |
+| Complaint Management | `resident/complaints.php`, `admin/complaints.php` |
+| Reporting | `admin/reports.php` |
+
+**External Systems, as built:** the report's architecture (slide 8) and context DFD
+(slide 10 — "Payment request" / "Payment confirmation" flows) both show a Mobile
+Money Payment Gateway. In this prototype that box is simulated entirely inside the
+Payment Processing module: `resident/pay.php` writes a `payments` row directly with
+a flat fee per waste type; no outbound call is made to MTN, Airtel, or any gateway.
+The SMS Notification Gateway on the same slide is represented as an in-app status
+change the resident sees on `my_requests.php` — for example once an admin assigns a
+collector — rather than an actual SMS being sent.
+
+### How one request is handled
+
+Zooming into the Application Layer above: there's no separate router. Each PHP file
+is both the URL endpoint and the controller for that request — open `admin/zones.php`
+and you're looking at everything that page does, top to bottom. Every page under
+`resident/`, `collector/`, and `admin/` starts with the same call, before any HTML
+is written: `require_role('resident')`. That's the entire access-control layer — no
+middleware stack, just a function that checks the PHP session and redirects to
+`login.php` if the role doesn't match.
 
 ```mermaid
 flowchart LR
@@ -70,9 +127,9 @@ flowchart LR
     F -->|"302 redirect"| A
 ```
 
-*There's no router: the file the browser asks for **is** the controller. Every
-protected page opens with a session check that either sends the visitor to
-`login.php` or lets the rest of the file run.*
+*This is the request path inside the Application Layer shown in the diagram above —
+for instance, a request hitting the Pickup Request & Scheduling module. There's no
+router: the file the browser asks for **is** the controller.*
 
 ### Stack & why
 
@@ -219,6 +276,14 @@ product.
 | Administrator | Complaints | `admin/complaints.php` | Respond and resolve. |
 | Administrator | Reports | `admin/reports.php` | Date-ranged counts and totals. |
 
+> **Beyond slide 6's summary:** the Administrator column there lists managing
+> zones/schedules, assigning collectors, resolving complaints, and generating
+> reports. Two more admin pages exist in the build — `admin/vehicles.php` and
+> `admin/collectors.php` — because collectors can't self-register (build spec §7)
+> and vehicles are their own entity in the ERD (slide 11). These are
+> implementation necessities the slide's summary doesn't spell out, not scope
+> added beyond the design.
+
 ### Visual language
 
 The live palette, pulled straight from [`assets/css/style.css`](assets/css/style.css)
@@ -286,6 +351,21 @@ defense panel will ask about is covered.
 Out of scope on purpose, per the project brief: CSRF tokens, rate limiting, email
 verification, password reset. Worth naming as deliberate scope decisions if asked,
 not gaps.
+
+### Non-functional requirements (slide 7)
+
+Slide 7 names six: Usability, Performance, Security, Reliability, Scalability,
+Compatibility. Security is the table above; here's how the build addresses the
+other five.
+
+| Requirement | How the build satisfies it |
+|---|---|
+| Usability | One shared navbar/footer and Bootstrap 5 components across every page; HTML5 form validation (`required`, `type="email"`) gives immediate feedback before the server round-trip. |
+| Performance | No framework or build overhead — pages render directly; each query is a single indexed lookup (primary/foreign keys via InnoDB defaults), so pages stay fast without caching. |
+| Security | See the Security Measures table above. |
+| Reliability | PDO exceptions are caught and logged rather than crashing visibly — a failed DB connection or a blocked delete on a zone still in use both show a plain-language message, not a stack trace. |
+| Scalability | Stateless procedural pages behind PHP-FPM/Apache scale horizontally on shared hosting as-is; the schema's normalized with proper foreign keys, so new zones, vehicles, or collectors add rows, not redesigns. |
+| Compatibility | Bootstrap 5's responsive grid and no JS-framework dependency mean the same pages work across desktop and mobile browsers without a separate mobile build. |
 
 ---
 

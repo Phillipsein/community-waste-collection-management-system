@@ -1,4 +1,4 @@
-# Community Waste Collection Management System — Presentation & Technical Guide
+# Community Waste Collection Management System - Presentation & Technical Guide
 
 **Group 6** · Phillip Ssempereza · Mwondha Andrew · Sserunjogi Muhammad · Kimoga Sudais
 
@@ -9,7 +9,7 @@ This is a walkthrough guide, not a replacement for the full project report.
 - Repo: [Phillipsein/community-waste-collection-management-system](https://github.com/Phillipsein/community-waste-collection-management-system)
 - Live site: [group6-project.philltechs.com](https://group6-project.philltechs.com)
 
-> Diagrams below are Mermaid — GitHub renders them automatically when you view this
+> Diagrams below are Mermaid - GitHub renders them automatically when you view this
 > file on github.com. In a plain local Markdown preview (e.g. VS Code without the
 > Mermaid extension) they'll show as code blocks instead of pictures.
 
@@ -28,7 +28,7 @@ This is a walkthrough guide, not a replacement for the full project report.
 
 ## 1. Overview
 
-Waste pickup in most residential communities is coordinated informally — a phone
+Waste pickup in most residential communities is coordinated informally - a phone
 call to a collector, a note passed to a neighbour, no shared record of what was
 requested, when it's due, or whether it's been paid for. Nobody has a single view
 of the zone's schedule, the fleet, or which complaints are still open.
@@ -48,7 +48,7 @@ staff, and can see the whole operation's numbers on one dashboard.
 
 ## 2. System Architecture
 
-The build brief was explicit: plain PHP, no framework, no Composer, no build step —
+The build brief was explicit: plain PHP, no framework, no Composer, no build step -
 ordinary Hostinger shared hosting with no SSH access. Logically, the system still
 follows the layered design from the report's architecture diagram (slide 8): a
 Presentation Layer, an Application Layer split into five modules, a Data Layer, and
@@ -85,7 +85,7 @@ flowchart TB
 
 *Matches the report's slide 8: same four layers, same five modules, same two
 external systems. The dashed lines mark where this prototype substitutes a
-simulation for the real external call — see below.*
+simulation for the real external call - see below.*
 
 **Module map (slide 8 → this build):**
 
@@ -98,21 +98,21 @@ simulation for the real external call — see below.*
 | Reporting | `admin/reports.php` |
 
 **External Systems, as built:** the report's architecture (slide 8) and context DFD
-(slide 10 — "Payment request" / "Payment confirmation" flows) both show a Mobile
+(slide 10 - "Payment request" / "Payment confirmation" flows) both show a Mobile
 Money Payment Gateway. In this prototype that box is simulated entirely inside the
 Payment Processing module: `resident/pay.php` writes a `payments` row directly with
 a flat fee per waste type; no outbound call is made to MTN, Airtel, or any gateway.
 The SMS Notification Gateway on the same slide is represented as an in-app status
-change the resident sees on `my_requests.php` — for example once an admin assigns a
-collector — rather than an actual SMS being sent.
+change the resident sees on `my_requests.php` - for example once an admin assigns a
+collector - rather than an actual SMS being sent.
 
 ### How one request is handled
 
 Zooming into the Application Layer above: there's no separate router. Each PHP file
-is both the URL endpoint and the controller for that request — open `admin/zones.php`
+is both the URL endpoint and the controller for that request - open `admin/zones.php`
 and you're looking at everything that page does, top to bottom. Every page under
 `resident/`, `collector/`, and `admin/` starts with the same call, before any HTML
-is written: `require_role('resident')`. That's the entire access-control layer — no
+is written: `require_role('resident')`. That's the entire access-control layer - no
 middleware stack, just a function that checks the PHP session and redirects to
 `login.php` if the role doesn't match.
 
@@ -127,7 +127,7 @@ flowchart LR
     F -->|"302 redirect"| A
 ```
 
-*This is the request path inside the Application Layer shown in the diagram above —
+*This is the request path inside the Application Layer shown in the diagram above -
 for instance, a request hitting the Pickup Request & Scheduling module. There's no
 router: the file the browser asks for **is** the controller.*
 
@@ -136,15 +136,15 @@ router: the file the browser asks for **is** the controller.*
 | Layer | Choice | Why |
 |---|---|---|
 | Backend | PHP 8.1+, procedural | Runs on shared hosting with no Composer/SSH; any file is readable top to bottom by a lecturer who's never seen the codebase. |
-| Database | MySQL/MariaDB via PDO | Prepared statements only, everywhere a user value touches a query — no string concatenation into SQL. |
+| Database | MySQL/MariaDB via PDO | Prepared statements only, everywhere a user value touches a query - no string concatenation into SQL. |
 | Frontend | Bootstrap 5 (CDN) + `style.css` | No build step. One stylesheet carries the brand palette on top of Bootstrap's components. |
 | Auth | Native PHP sessions | No third-party auth library; `password_hash()` / `password_verify()` plus a role stored in `$_SESSION`. |
-| JS | Vanilla, minimal | Only for things HTML/CSS can't do alone — confirm dialogs on cancel and delete actions. |
+| JS | Vanilla, minimal | Only for things HTML/CSS can't do alone - confirm dialogs on cancel and delete actions. |
 
 ### Deployment pipeline
 
 The GitHub repo is the source of truth. A push to `main` fires a webhook that
-Hostinger listens on, which pulls the new code straight into `public_html` — no
+Hostinger listens on, which pulls the new code straight into `public_html` - no
 manual FTP step.
 
 ```mermaid
@@ -157,14 +157,14 @@ flowchart LR
 ```
 
 *`config.php` holds the real database credentials and is deliberately excluded from
-git (`.gitignore`) — only the placeholder `config.sample.php` is tracked. It's
+git (`.gitignore`) - only the placeholder `config.sample.php` is tracked. It's
 created once by hand on the server, and every later auto-deploy leaves it alone.*
 
 ---
 
 ## 3. Database Design
 
-Nine tables, mirroring the ERD in the project report exactly. `zones` is the hub —
+Nine tables, mirroring the ERD in the project report exactly. `zones` is the hub -
 every resident, every collector, and every schedule belongs to one. `administrators`
 is deliberately standalone: it manages the system rather than participating in the
 operational data, so it carries no foreign keys.
@@ -232,7 +232,7 @@ erDiagram
     }
 ```
 
-*`ADMINISTRATORS` appears with no relationship lines on purpose — it has no foreign
+*`ADMINISTRATORS` appears with no relationship lines on purpose - it has no foreign
 keys at all.*
 
 ### Full schema reference
@@ -241,7 +241,7 @@ keys at all.*
 |---|---|---|
 | `zones` | `zone_id` PK | The geographic units the whole system is organised around. |
 | `administrators` | `admin_id` PK · `email` UNIQUE | Staff accounts that manage the system. Seeded, not self-registered. |
-| `vehicles` | `vehicle_id` PK | The fleet — registration, type, capacity. |
+| `vehicles` | `vehicle_id` PK | The fleet - registration, type, capacity. |
 | `residents` | `resident_id` PK · `zone_id` FK · `email` UNIQUE | Self-registered residents, each in exactly one zone. |
 | `collectors` | `collector_id` PK · `zone_id` FK · `vehicle_id` FK | Staff accounts created by an admin, each assigned a zone and (optionally) a vehicle. |
 | `schedules` | `schedule_id` PK · `zone_id` FK | Recurring collection day / time / frequency per zone. |
@@ -255,7 +255,7 @@ Full `CREATE TABLE` statements: [`sql/schema.sql`](sql/schema.sql).
 
 ## 4. Roles & Interface
 
-Every role gets the same navbar and footer shell — only the links change. No
+Every role gets the same navbar and footer shell - only the links change. No
 sidebars, no separate admin theme; the whole system reads as one consistent
 product.
 
@@ -278,8 +278,8 @@ product.
 
 > **Beyond slide 6's summary:** the Administrator column there lists managing
 > zones/schedules, assigning collectors, resolving complaints, and generating
-> reports. Two more admin pages exist in the build — `admin/vehicles.php` and
-> `admin/collectors.php` — because collectors can't self-register (build spec §7)
+> reports. Two more admin pages exist in the build - `admin/vehicles.php` and
+> `admin/collectors.php` - because collectors can't self-register (build spec §7)
 > and vehicles are their own entity in the ERD (slide 11). These are
 > implementation necessities the slide's summary doesn't spell out, not scope
 > added beyond the design.
@@ -287,13 +287,13 @@ product.
 ### Visual language
 
 The live palette, pulled straight from [`assets/css/style.css`](assets/css/style.css)
-— the same colours as the report and the defense slides.
+- the same colours as the report and the defense slides.
 
 | Colour | Hex | Role |
 |---|---|---|
-| Forest | `#2C5F2D` | Primary — navbar, footer, headings |
-| Moss | `#97BC62` | Secondary — status accents |
-| Gold | `#C98A2C` | Accent, used sparingly — Pay button, key highlights |
+| Forest | `#2C5F2D` | Primary - navbar, footer, headings |
+| Moss | `#97BC62` | Secondary - status accents |
+| Gold | `#C98A2C` | Accent, used sparingly - Pay button, key highlights |
 | Paper | `#F4F6F2` | Background |
 | Ink | `#222222` | Body text |
 
@@ -308,7 +308,7 @@ most on a page (Pay, Add, Assign).
 ## 5. Core Workflow
 
 Every pickup request moves through the same life, and each transition belongs to a
-specific role — nobody but the resident cancels, nobody but the admin assigns,
+specific role - nobody but the resident cancels, nobody but the admin assigns,
 nobody but the collector completes.
 
 ```mermaid
@@ -322,30 +322,30 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-"Paid" isn't a status on the request itself — it's inferred from whether a
+"Paid" isn't a status on the request itself - it's inferred from whether a
 `payments` row exists for it, which is why the Pay button on `my_requests.php`
 only shows for a completed request with none yet.
 
 **Complaints run a simpler two-state life:** a resident submits one as `open`; an
 administrator writes a response and marks it `resolved`. The resident sees that
-response on their own Complaints page the moment it's saved — no separate
+response on their own Complaints page the moment it's saved - no separate
 notification step.
 
 ---
 
 ## 6. Security Measures
 
-Deliberately simple, matching the project's scope — but every basic that a class
+Deliberately simple, matching the project's scope - but every basic that a class
 defense panel will ask about is covered.
 
 | Measure | Where | Why it matters |
 |---|---|---|
-| Prepared statements | `includes/db.php` | Every query touching user input goes through PDO with bound parameters — no string-concatenated SQL, anywhere. |
-| Password hashing | `register.php`, `admin/collectors.php` | `password_hash()` / `password_verify()` — passwords are never stored or compared in plain text. |
+| Prepared statements | `includes/db.php` | Every query touching user input goes through PDO with bound parameters - no string-concatenated SQL, anywhere. |
+| Password hashing | `register.php`, `admin/collectors.php` | `password_hash()` / `password_verify()` - passwords are never stored or compared in plain text. |
 | Role gate | `includes/auth.php → require_role()` | Called before any output on every protected page; wrong role or no session → redirect to login. |
-| Output escaping | Every page | `htmlspecialchars()` on all dynamic output — verified directly with a script-tag complaint submission. |
-| Vague login errors | `login.php` | One generic message either way — never reveals whether the email or the password was wrong. |
-| Errors hidden, still logged | `config.php` | `display_errors=0`, `log_errors=1` — visitors never see a raw PHP error; the server log still has it. |
+| Output escaping | Every page | `htmlspecialchars()` on all dynamic output - verified directly with a script-tag complaint submission. |
+| Vague login errors | `login.php` | One generic message either way - never reveals whether the email or the password was wrong. |
+| Errors hidden, still logged | `config.php` | `display_errors=0`, `log_errors=1` - visitors never see a raw PHP error; the server log still has it. |
 | Credentials never committed | `.gitignore` → `config.php` | Only the placeholder `config.sample.php` is tracked in git. |
 
 Out of scope on purpose, per the project brief: CSRF tokens, rate limiting, email
@@ -361,9 +361,9 @@ other five.
 | Requirement | How the build satisfies it |
 |---|---|
 | Usability | One shared navbar/footer and Bootstrap 5 components across every page; HTML5 form validation (`required`, `type="email"`) gives immediate feedback before the server round-trip. |
-| Performance | No framework or build overhead — pages render directly; each query is a single indexed lookup (primary/foreign keys via InnoDB defaults), so pages stay fast without caching. |
+| Performance | No framework or build overhead - pages render directly; each query is a single indexed lookup (primary/foreign keys via InnoDB defaults), so pages stay fast without caching. |
 | Security | See the Security Measures table above. |
-| Reliability | PDO exceptions are caught and logged rather than crashing visibly — a failed DB connection or a blocked delete on a zone still in use both show a plain-language message, not a stack trace. |
+| Reliability | PDO exceptions are caught and logged rather than crashing visibly - a failed DB connection or a blocked delete on a zone still in use both show a plain-language message, not a stack trace. |
 | Scalability | Stateless procedural pages behind PHP-FPM/Apache scale horizontally on shared hosting as-is; the schema's normalized with proper foreign keys, so new zones, vehicles, or collectors add rows, not redesigns. |
 | Compatibility | Bootstrap 5's responsive grid and no JS-framework dependency mean the same pages work across desktop and mobile browsers without a separate mobile build. |
 
@@ -375,12 +375,12 @@ other five.
 
 1. Install XAMPP/WAMP/Laragon (PHP 8.1+, MySQL).
 2. Create a database, import `sql/schema.sql` then `sql/seed.sql`.
-3. `config.php` already has working local defaults — edit only if your setup differs.
+3. `config.php` already has working local defaults - edit only if your setup differs.
 4. Point the document root at the project folder, open `index.php`.
 
 ### Ship it live
 
-1. Push to `main` — the GitHub webhook triggers Hostinger's auto-deploy.
+1. Push to `main` - the GitHub webhook triggers Hostinger's auto-deploy.
 2. First deploy only: create `config.php` by hand in hPanel's File Manager (it's
    gitignored).
 3. Import `schema.sql` + `seed.sql` once, via phpMyAdmin.
@@ -389,7 +389,7 @@ other five.
 
 ### Demo accounts
 
-Seeded test accounts for the live demo — not real user data.
+Seeded test accounts for the live demo - not real user data.
 
 | Role | Email | Password |
 |---|---|---|
@@ -402,29 +402,29 @@ Seeded test accounts for the live demo — not real user data.
 
 ## 8. Presentation Script
 
-A suggested run-of-show — enough to demonstrate the full request lifecycle across
+A suggested run-of-show - enough to demonstrate the full request lifecycle across
 all three roles in one continuous pass, five to seven minutes.
 
 | Step | Show | As | Say |
 |---|---|---|---|
-| 1 | Landing page → About | — | The problem this replaces, then the four of us on the About page. |
-| 2 | Register, land on dashboard | New resident | Self-registration is a resident-only feature — staff accounts are seeded or admin-created. |
+| 1 | Landing page → About | - | The problem this replaces, then the four of us on the About page. |
+| 2 | Register, land on dashboard | New resident | Self-registration is a resident-only feature - staff accounts are seeded or admin-created. |
 | 3 | Request Pickup → My Requests | Resident | Request goes in as `pending`, no collector yet. |
-| 4 | Dashboard counters, then Requests → Assign | Administrator | The dropdown only offers collectors from the resident's own zone — enforced server-side too. |
+| 4 | Dashboard counters, then Requests → Assign | Administrator | The dropdown only offers collectors from the resident's own zone - enforced server-side too. |
 | 5 | My Requests → Mark Completed | Collector | Collectors only ever see their own assigned queue. |
-| 6 | My Requests → Pay | Resident | Simulated payment — flat fee by waste type, clearly labelled as simulated. |
-| 7 | Reports page | Administrator | Numbers just moved — the whole demo is reflected live in the report. |
+| 6 | My Requests → Pay | Resident | Simulated payment - flat fee by waste type, clearly labelled as simulated. |
+| 7 | Reports page | Administrator | Numbers just moved - the whole demo is reflected live in the report. |
 | 8 | Submit a complaint → resolve it | Resident then Admin | The resident sees the response the moment it's saved. |
 
 ### Likely questions
 
 **Q: Why plain PHP and not a framework?**
-A: Hostinger shared hosting here has no SSH or Composer access — the brief called
+A: Hostinger shared hosting here has no SSH or Composer access - the brief called
 for files that run as uploaded, and for any file to be readable top to bottom
 without knowing a framework's conventions.
 
 **Q: How is SQL injection prevented?**
-A: Every query goes through PDO prepared statements with bound parameters —
+A: Every query goes through PDO prepared statements with bound parameters -
 nowhere does user input get concatenated into a query string.
 
 **Q: Why is the payment simulated?**
@@ -433,15 +433,15 @@ the page states plainly that it's simulated rather than pretending otherwise.
 
 **Q: How is access control enforced per role?**
 A: `require_role()` runs at the very top of every protected page, before any
-output, checking the session — not just hiding a nav link.
+output, checking the session - not just hiding a nav link.
 
 **Q: What would change for a production version?**
 A: CSRF tokens, rate limiting, real payment gateway integration, email
-verification, and a password reset flow — all named explicitly as future work
+verification, and a password reset flow - all named explicitly as future work
 rather than omitted quietly.
 
 **Q: Why UGX and MTN/Airtel Money as payment options?**
-A: The report is written for the Ugandan urban context this system targets — those
+A: The report is written for the Ugandan urban context this system targets - those
 are the payment methods residents there actually use.
 
 ---

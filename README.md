@@ -2,6 +2,10 @@
 
 A Web Based Waste Collection Management System for Urban Residential Communities.
 
+Presenting or defending this project? See
+[PRESENTATION_GUIDE.md](PRESENTATION_GUIDE.md) for the architecture, database
+(ERD), interface walkthrough, and a suggested live-demo script.
+
 **Group 6**
 
 | Name | Registration Number |

@@ -1,0 +1,9 @@
+# Real database credentials for this environment. Never commit this file;
+# config.sample.php is the tracked placeholder reference. On a fresh clone
+# (including Hostinger's first auto-deploy), copy config.sample.php to
+# config.php and fill in the real values.
+config.php
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

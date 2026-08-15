@@ -1,0 +1,110 @@
+/* Brand colors and small layout tweaks for the
+   Community Waste Collection Management System (Group 6).
+   Bootstrap 5 (CDN) provides the base styling; this file only overrides
+   what's needed to match the project's report and presentation palette. */
+
+:root {
+  --brand-primary: #2C5F2D;   /* forest green */
+  --brand-secondary: #97BC62; /* moss green */
+  --brand-accent: #C98A2C;    /* warm gold */
+  --brand-bg: #F4F6F2;
+  --brand-text: #222222;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Pushes the footer to the bottom of the viewport on short pages, while
+   still letting it sit below the content normally on tall pages. */
+main {
+  flex: 1 0 auto;
+}
+
+/* Navbar */
+.app-navbar {
+  background-color: var(--brand-primary);
+}
+
+.app-navbar .navbar-brand,
+.app-navbar .nav-link {
+  color: #ffffff;
+}
+
+.app-navbar .nav-link:hover {
+  color: var(--brand-secondary);
+}
+
+/* Footer */
+.app-footer {
+  background-color: var(--brand-primary);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* Accent buttons (Pay, Login, primary actions) */
+.btn-accent {
+  background-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #ffffff;
+}
+
+.btn-accent:hover {
+  background-color: #ad7623;
+  border-color: #ad7623;
+  color: #ffffff;
+}
+
+.btn-brand {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #ffffff;
+}
+
+.btn-brand:hover {
+  background-color: #234a24;
+  border-color: #234a24;
+  color: #ffffff;
+}
+
+/* Cards */
+.card-header.bg-brand {
+  background-color: var(--brand-primary);
+  color: #ffffff;
+}
+
+/* Landing page hero */
+.hero {
+  background-color: var(--brand-secondary);
+  border-radius: .5rem;
+  padding: 3rem 2rem;
+  color: #ffffff;
+}
+
+/* Dashboard summary tiles */
+.stat-card {
+  border-left: 4px solid var(--brand-primary);
+}
+
+.stat-card .stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+/* Status badges: keep Bootstrap's badge look, just line up meaning to color */
+.badge-pending   { background-color: #97BC62; color: #1c3d1d; }
+.badge-assigned  { background-color: #0d6efd; }
+.badge-completed { background-color: #2C5F2D; }
+.badge-cancelled { background-color: #6c757d; }
+.badge-open      { background-color: #C98A2C; }
+.badge-resolved  { background-color: #2C5F2D; }
+.badge-paid      { background-color: #2C5F2D; }

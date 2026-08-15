@@ -11,7 +11,7 @@ require __DIR__ . '/includes/header.php';
 ?>
 
 <div class="hero mb-4">
-  <h1>A Web Based Waste Collection Management System</h1>
+  <h1>2A Web Based Waste Collection Management System</h1>
   <p class="lead mb-4">
     Helping urban residential communities request pickups, track collection
     schedules, pay for service, and raise complaints, all in one place, while
